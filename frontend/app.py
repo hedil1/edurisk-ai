@@ -13,8 +13,8 @@ from tensorflow.keras.models import load_model
 
 # ================= CONFIG =================
 st.set_page_config(
-    page_title="EduRisk AI — Dropout Prediction",
-    page_icon="🎓",
+    page_title="EduRisk Dashbord AI  ",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -239,7 +239,7 @@ try:
     columns, scaler, rf, xgb_m, ann = load_all_models()
     models_loaded = True
 except Exception as e:
-    st.sidebar.error(f"⚠️ Models not found: {e}")
+    st.sidebar.error(f"Models not found: {e}")
     models_loaded = False
 
 # ================= PREPARE FEATURES =================
@@ -262,10 +262,10 @@ def save_history(hist):
 
 # ================= HELPERS =================
 MODEL_OPTIONS = {
-    "🌲 Random Forest": "rf",
-    "⚡ XGBoost": "xgb",
-    "🧠 Neural Network (ANN)": "ann",
-    "🔀 Ensemble (moyenne)": "ensemble",
+    " Random Forest": "rf",
+    " XGBoost": "xgb",
+    " Neural Network (ANN)": "ann",
+    " Ensemble (moyenne)": "ensemble",
 }
 
 def predict_proba_single(i, model_key="ensemble"):
@@ -297,14 +297,14 @@ def predict_confidence(i, model_key="ensemble"):
 
 def risk_status(score_eng, proba):
     if score_eng < 0.4:
-        return "URGENT", "🚨 URGENT"
+        return "URGENT", " URGENT"
     if proba > 0.6:
-        return "HIGH", "🔥 HIGH RISK"
-    return "LOW", "🟢 LOW RISK"
+        return "HIGH", " HIGH RISK"
+    return "LOW", " LOW RISK"
 
 def badge_html(level):
     cls = {"URGENT": "urgent", "HIGH": "high", "LOW": "low"}.get(level, "low")
-    labels = {"URGENT": "🚨 URGENT", "HIGH": "🔥 HIGH RISK", "LOW": "🟢 LOW RISK"}
+    labels = {"URGENT": " URGENT", "HIGH": " HIGH RISK", "LOW": " LOW RISK"}
     return f'<span class="risk-badge-{cls}">{labels[level]}</span>'
 
 def bar_color(p):
@@ -355,26 +355,26 @@ def generate_recommendations(student, proba, level, shap_vals, col_names):
 
     if level == "URGENT":
         recos.append({
-            "icon": "🚨", "priority": "urgent",
+            "icon": "", "priority": "urgent",
             "title": "Appel téléphonique immédiat",
             "desc": "Contacter l'élève dans les 24h. Score d'engagement critique (<0.4). Identifier les obstacles à la connexion et proposer un plan de rattrapage personnalisé."
         })
         recos.append({
-            "icon": "👨‍🏫", "priority": "urgent",
+            "icon": "", "priority": "urgent",
             "title": "Assignation d'un tuteur dédié",
             "desc": "Assigner un tuteur pédagogique pour un suivi hebdomadaire. Prévoir 2 sessions de 30 min la première semaine."
         })
 
     if nb_co < 5:
         recos.append({
-            "icon": "📲", "priority": "high",
+            "icon": "", "priority": "high",
             "title": "Campagne de ré-engagement",
             "desc": f"L'élève ne s'est connecté que {int(nb_co)} fois. Envoyer une séquence d'emails de relance + notification push avec contenu exclusif pour recréer l'habitude de connexion."
         })
 
     if progression < 30:
         recos.append({
-            "icon": "🎯", "priority": "high",
+            "icon": "", "priority": "high",
             "title": "Module de démarrage simplifié",
             "desc": f"Progression à {progression:.0f}%. Proposer un parcours accéléré avec les 3 modules essentiels. Débloquer des badges de progression pour stimuler la motivation."
         })
@@ -388,26 +388,26 @@ def generate_recommendations(student, proba, level, shap_vals, col_names):
 
     if proba > 0.5 and level != "URGENT":
         recos.append({
-            "icon": "🎁", "priority": "high",
+            "icon": "", "priority": "high",
             "title": "Offre de module bonus",
             "desc": "Débloquer un module bonus gratuit comme incentive. Peut inclure un certificat intermédiaire ou un accès à du contenu premium pour 30 jours."
         })
 
     if any("connexion" in c.lower() or "login" in c.lower() for c in top_bad):
         recos.append({
-            "icon": "⏰", "priority": "high",
+            "icon": "", "priority": "high",
             "title": "Rappel de planning personnalisé",
             "desc": "La fréquence de connexion est la cause principale identifiée. Envoyer un planning hebdomadaire adapté aux horaires connus de l'élève."
         })
 
     if level == "LOW":
         recos.append({
-            "icon": "⭐", "priority": "low",
+            "icon": "", "priority": "low",
             "title": "Programme ambassadeur",
             "desc": "Profil stable et engagé. Inviter l'élève à rejoindre le programme ambassadeur : parrainage d'autres étudiants en échange de réduction sur le prochain module."
         })
         recos.append({
-            "icon": "📈", "priority": "low",
+            "icon": "", "priority": "low",
             "title": "Suivi standard — rapport mensuel",
             "desc": "Continuer le suivi standard. Envoyer un rapport de progression mensuel automatisé pour maintenir l'engagement."
         })
@@ -542,15 +542,15 @@ with st.sidebar:
     run_btn = st.button("🚀 Analyser cet élève", use_container_width=True)
 
     st.markdown("---")
-    st.markdown("**📝 NOUVELLE ACTION**")
+    st.markdown("** NOUVELLE ACTION**")
     action_type = st.selectbox("Type d'intervention", [
-        "📞 Appel téléphonique", "📧 Email de relance", "💬 Session live",
-        "🎁 Module bonus envoyé", "👨‍🏫 Session tutorat", "📋 Autre"
+        " Appel téléphonique", " Email de relance", " Session live",
+        " Module bonus envoyé", " Session tutorat", " Autre"
     ], label_visibility="collapsed")
     action_note = st.text_area("Note / Résultat", placeholder="Ex: Élève a répondu positivement, prévu session vendredi...", height=80, label_visibility="collapsed")
     action_impact = st.selectbox("Impact observé", ["— Non évalué —", "Positif ✅", "Neutre ➖", "Négatif ❌"], label_visibility="collapsed")
 
-    if st.button("💾 Enregistrer l'action", use_container_width=True):
+    if st.button(" Enregistrer l'action", use_container_width=True):
         if action_note.strip():
             hist = load_history()
             key  = str(student_name)
@@ -563,7 +563,7 @@ with st.sidebar:
                 "impact": action_impact
             })
             save_history(hist)
-            st.success("✅ Action enregistrée !")
+            st.success(" Action enregistrée !")
         else:
             st.warning("Ajoutez une note avant d'enregistrer.")
 
@@ -574,7 +574,7 @@ student = df.iloc[iloc_idx]
 st.markdown(f"""
 <div style='margin-bottom: 1.5rem'>
     <div style='font-family: Space Grotesk, sans-serif; font-size: 1.9rem; font-weight: 700; color: #e6edf3'>
-        🎓 Tableau de bord
+         Tableau de bord
     </div>
     <div style='font-size: 0.85rem; color: #8b949e; margin-top: 0.2rem'>
         Plateforme de prédiction d'abandon — Tunisie EdTech
@@ -588,12 +588,12 @@ if models_loaded:
         all_probas = np.array([predict_proba_single(i, selected_model) for i in range(len(df))])
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("👥 Total Élèves", len(df))
-    m2.metric("🚨 Risque Urgent", int((df.get("score engagement (kpo)", pd.Series([1]*len(df))) < 0.4).sum()))
-    m3.metric("🔥 Risque Élevé", int((all_probas > 0.6).sum()))
-    m4.metric("📊 Risque Moyen", f"{all_probas.mean()*100:.1f}%")
+    m1.metric("Total Élèves", len(df))
+    m2.metric(" Risque Urgent", int((df.get("score engagement (kpo)", pd.Series([1]*len(df))) < 0.4).sum()))
+    m3.metric(" Risque Élevé", int((all_probas > 0.6).sum()))
+    m4.metric(" Risque Moyen", f"{all_probas.mean()*100:.1f}%")
 else:
-    st.info("⚠️ Entraînez d'abord les modèles avec train.py")
+    st.info(" Entraînez d'abord les modèles avec train.py")
 
 st.markdown("---")
 
@@ -803,11 +803,11 @@ with col_right:
         """, unsafe_allow_html=True)
 
         if level == "URGENT":
-            st.error("⚠️ Action immédiate requise — contacter le tuteur pédagogique.")
+            st.error(" Action immédiate requise — contacter le tuteur pédagogique.")
         elif level == "HIGH":
-            st.warning("📬 Relance recommandée — planifier un entretien de suivi.")
+            st.warning(" Relance recommandée — planifier un entretien de suivi.")
         else:
-            st.success("✅ Profil stable — continuer le suivi standard.")
+            st.success(" Profil stable — continuer le suivi standard.")
 
     elif not run_btn:
         # Show last result if available
@@ -826,7 +826,7 @@ with col_right:
     # ---- Tabs: SHAP | Recommendations | Top10 | History ----
     st.markdown("---")
     tab_shap, tab_reco, tab_top10, tab_hist = st.tabs([
-        "🔍 SHAP Explication", "💡 Recommandations", "🔥 Top 10 Risque", "📋 Historique"
+        " SHAP Explication", " Recommandations", " Top 10 Risque", " Historique"
     ])
 
     # ---- SHAP ----
@@ -866,7 +866,7 @@ with col_right:
             )
             fig_shap.add_vline(x=0, line_color="#30363d", line_width=1.5)
             st.plotly_chart(fig_shap, use_container_width=True)
-            st.caption("🔴 Rouge = pousse vers le dropout · 🟢 Vert = facteur protecteur")
+            st.caption(" Rouge = pousse vers le dropout ·  Vert = facteur protecteur")
 
             # Top 3 explanation text
             top_risk_feats   = [(n, v) for v, n in pairs if v > 0][:3]
@@ -956,9 +956,9 @@ with col_right:
             neg = sum(1 for i in impacts if "Négatif" in i)
 
             hc1, hc2, hc3 = st.columns(3)
-            hc1.metric("✅ Positif", pos)
-            hc2.metric("➖ Neutre", neu)
-            hc3.metric("❌ Négatif", neg)
+            hc1.metric(" Positif", pos)
+            hc2.metric(" Neutre", neu)
+            hc3.metric(" Négatif", neg)
 
             st.markdown("---")
 
@@ -976,12 +976,12 @@ with col_right:
                         <div class="action-impact-{impact_class}" style="font-size:0.78rem">{entry['impact']}</div>
                     </div>
                     <div style="color:#c9d1d9; margin-top:0.35rem; font-size:0.85rem; line-height:1.5">{entry['note']}</div>
-                    <div class="action-meta">🕐 {entry['date']}</div>
+                    <div class="action-meta"> {entry['date']}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
             # Clear history
-            if st.button("🗑️ Effacer l'historique de cet élève"):
+            if st.button(" Effacer l'historique de cet élève"):
                 hist.pop(key, None)
                 save_history(hist)
                 st.rerun()
