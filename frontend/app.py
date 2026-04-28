@@ -227,7 +227,7 @@ def load_all_models():
     scaler  = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
     rf      = joblib.load(os.path.join(MODEL_DIR, "rf_model.pkl"))
     xgb_m   = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
-    ann = load_model(os.path.join(MODEL_DIR, "ann_model.keras"), compile=False)
+    ann = load_model(os.path.join(MODEL_DIR, "ann_model.h5"), compile=False)
     return columns, scaler, rf, xgb_m, ann
 
 try:
