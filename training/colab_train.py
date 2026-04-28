@@ -190,10 +190,7 @@ try:
     joblib.dump(columns,    os.path.join(MODEL_DIR, "columns.pkl"))
 
     # Sauvegarde robuste pour déploiement
-    ann_model.save_weights(os.path.join(MODEL_DIR, "ann_weights.h5"))
-
-    with open(os.path.join(MODEL_DIR, "ann_architecture.json"), "w") as f:
-        f.write(ann_model.to_json())
+    ann_model.save(os.path.join(MODEL_DIR, "ann_model.h5"))
 
     print("     ✅ ANN sauvegardé (architecture.json + weights.h5)")
     print("     ✅ Tous les modèles sauvegardés !")
