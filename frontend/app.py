@@ -223,35 +223,46 @@ for col in df.columns:
 # ================= LOAD MODELS =================
 # ================= LOAD MODELS (Version compatible Streamlit Cloud) =================
 # ================= LOAD MODELS (Version compatible avec ann_model.keras) =================
+# ================= LOAD MODELS (Solution pour .keras + TF 2.15) =================
 @st.cache_resource
 def load_all_models():
     try:
-        # Activation de la compatibilité legacy (très important)
         import os
+        # Solution la plus forte pour compatibilité Keras 3 → Keras 2
         os.environ["TF_USE_LEGACY_KERAS"] = "1"
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-        import tensorflow as tf
-        from tensorflow.keras.models import load_model
+        # Utiliser tf_keras explicitement
+        import tf_keras as keras
+        from tf_keras.models import load_model
 
         columns = joblib.load(os.path.join(MODEL_DIR, "columns.pkl"))
         scaler  = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
         rf      = joblib.load(os.path.join(MODEL_DIR, "rf_model.pkl"))
         xgb_m   = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
 
-        # Chargement du modèle .keras (celui que tu as sur GitHub)
         ann_path = os.path.join(MODEL_DIR, "ann_model.keras")
         
         if not os.path.exists(ann_path):
-            raise FileNotFoundError(f"Fichier non trouvé: {ann_path}")
+            raise FileNotFoundError(f"ann_model.keras non trouvé dans {MODEL_DIR}")
 
         ann = load_model(ann_path, compile=False)
 
-        print("✅ Modèle ANN (.keras) chargé avec succès")
+        print("✅ Modèle ANN chargé avec tf_keras")
         return columns, scaler, rf, xgb_m, ann
 
     except Exception as e:
         raise Exception(f"Erreur chargement modèles: {str(e)}")
+
+
+# ================= INITIALISATION =================
+try:
+    columns, scaler, rf, xgb_m, ann = load_all_models()
+    models_loaded = True
+    st.sidebar.success("✅ Modèles chargés avec succès")
+except Exception as e:
+    models_loaded = False
+    st.sidebar.error(f"⚠️ Impossible de charger les modèles :\n{str(e)}")
 
 
 # ================= INITIALISATION DES MODÈLES =================
