@@ -8,6 +8,7 @@ import shap
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, date
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 
 # ================= CONFIG =================
@@ -227,7 +228,11 @@ def load_all_models():
     scaler  = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
     rf      = joblib.load(os.path.join(MODEL_DIR, "rf_model.pkl"))
     xgb_m   = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
-    ann = load_model(os.path.join(MODEL_DIR, "ann_model.keras"), compile=False)
+    # Try .h5 first (TF 2.16 compatible), fallback to .keras
+    _h5_path = os.path.join(MODEL_DIR, "ann_model.h5")
+    _keras_path = os.path.join(MODEL_DIR, "ann_model.keras")
+    _model_path = _h5_path if os.path.exists(_h5_path) else _keras_path
+    ann = load_model(_model_path, compile=False)
     return columns, scaler, rf, xgb_m, ann
 
 try:
