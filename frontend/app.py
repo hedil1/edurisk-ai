@@ -221,54 +221,48 @@ for col in df.columns:
 
 
 # ================= LOAD MODELS =================
-# ================= LOAD MODELS (Version corrigée pour déploiement) =================
+# ================= LOAD MODELS (Version compatible Streamlit Cloud) =================
 @st.cache_resource
 def load_all_models():
     try:
+        # Force compatibilité Keras ancienne version
         import os
         os.environ["TF_USE_LEGACY_KERAS"] = "1"
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
         import tensorflow as tf
-        from tensorflow.keras.models import model_from_json
+        from tensorflow.keras.models import load_model
 
-        # Chargement des modèles classiques
         columns = joblib.load(os.path.join(MODEL_DIR, "columns.pkl"))
         scaler  = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
         rf      = joblib.load(os.path.join(MODEL_DIR, "rf_model.pkl"))
         xgb_m   = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
 
-        # Chargement ANN (méthode robuste)
-        json_path = os.path.join(MODEL_DIR, "ann_architecture.json")
-        weights_path = os.path.join(MODEL_DIR, "ann_weights.h5")
+        # Chargement du modèle ANN avec compatibilité
+        ann_path = os.path.join(MODEL_DIR, "ann_model.h5")
+        ann = load_model(ann_path, compile=False)
 
-        if os.path.exists(json_path) and os.path.exists(weights_path):
-            with open(json_path, "r") as f:
-                model_json = f.read()
-            ann = model_from_json(model_json)
-            ann.load_weights(weights_path)
-            ann.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-            print("✅ ANN chargé via JSON + weights")
-        else:
-            raise FileNotFoundError("Fichiers ANN (json/weights) manquants")
-
-        print("✅ Tous les modèles chargés avec succès")
         return columns, scaler, rf, xgb_m, ann
 
     except Exception as e:
-        print(f"❌ Erreur chargement modèles: {e}")
-        raise e
+        raise Exception(f"Erreur chargement modèles: {str(e)}")
 
 
-# ================= Exécution du chargement =================
+# ================= INITIALISATION =================
 try:
     columns, scaler, rf, xgb_m, ann = load_all_models()
     models_loaded = True
+    st.sidebar.success("✅ Modèles chargés avec succès")
 except Exception as e:
-    st.sidebar.error(f"⚠️ Impossible de charger les modèles : {str(e)}")
     models_loaded = False
-    # Optionnel : arrêter l'app si les modèles sont indispensables
-    st.stop()
+    st.sidebar.error(f"⚠️ Impossible de charger les modèles : {str(e)}")
+# ================= PREPARE FEATURES =================
+if models_loaded:
+    X_df = df.reindex(columns=columns, fill_value=0)
+    for c in X_df.columns:
+        X_df[c] = pd.to_numeric(X_df[c], errors="coerce").fillna(0)
+    X_scaled = scaler.transform(X_df)
+
 # ================= ACTION HISTORY =================
 def load_history():
     if os.path.exists(HISTORY_FILE):
