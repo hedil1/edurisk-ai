@@ -221,6 +221,7 @@ for col in df.columns:
 
 
 # ================= LOAD MODELS =================
+# ================= LOAD MODELS (Version corrigée pour déploiement) =================
 @st.cache_resource
 def load_all_models():
     try:
@@ -231,12 +232,13 @@ def load_all_models():
         import tensorflow as tf
         from tensorflow.keras.models import model_from_json
 
+        # Chargement des modèles classiques
         columns = joblib.load(os.path.join(MODEL_DIR, "columns.pkl"))
         scaler  = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
         rf      = joblib.load(os.path.join(MODEL_DIR, "rf_model.pkl"))
         xgb_m   = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
 
-        # Chargement robuste du ANN
+        # Chargement ANN (méthode robuste)
         json_path = os.path.join(MODEL_DIR, "ann_architecture.json")
         weights_path = os.path.join(MODEL_DIR, "ann_weights.h5")
 
@@ -246,16 +248,27 @@ def load_all_models():
             ann = model_from_json(model_json)
             ann.load_weights(weights_path)
             ann.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+            print("✅ ANN chargé via JSON + weights")
         else:
-            # Fallback temporaire
-            ann = tf.keras.models.load_model(os.path.join(MODEL_DIR, "ann_model.h5"), compile=False)
+            raise FileNotFoundError("Fichiers ANN (json/weights) manquants")
 
-        print("✅ Modèles chargés avec succès")
+        print("✅ Tous les modèles chargés avec succès")
         return columns, scaler, rf, xgb_m, ann
 
     except Exception as e:
-        st.error(f"Erreur chargement modèles : {e}")
+        print(f"❌ Erreur chargement modèles: {e}")
         raise e
+
+
+# ================= Exécution du chargement =================
+try:
+    columns, scaler, rf, xgb_m, ann = load_all_models()
+    models_loaded = True
+except Exception as e:
+    st.sidebar.error(f"⚠️ Impossible de charger les modèles : {str(e)}")
+    models_loaded = False
+    # Optionnel : arrêter l'app si les modèles sont indispensables
+    st.stop()
 # ================= ACTION HISTORY =================
 def load_history():
     if os.path.exists(HISTORY_FILE):
