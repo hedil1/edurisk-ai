@@ -1,0 +1,16 @@
+{
+  "Ansem El fan": [
+    {
+      "date": "28/04/2026 17:54",
+      "type": "📞 Appel téléphonique",
+      "note": "l'eleve est bon trvailler",
+      "impact": "Positif ✅"
+    },
+    {
+      "date": "28/04/2026 18:10",
+      "type": "📧 Email de relance",
+      "note": "just pour les seances live",
+      "impact": "Positif ✅"
+    }
+  ]
+}
