@@ -186,7 +186,7 @@ try:
     joblib.dump(xgb_model,  os.path.join(MODEL_DIR, "xgb_model.pkl"))
     joblib.dump(scaler,     os.path.join(MODEL_DIR, "scaler.pkl"))
     joblib.dump(columns,    os.path.join(MODEL_DIR, "columns.pkl"))
-    ann_model.save(os.path.join(MODEL_DIR, "ann_model.keras"))
+    ann_model.save(os.path.join(MODEL_DIR, "ann_model.h5"))
 
     print("     ✅ Tous les modèles sauvegardés dans /models/")
 except Exception as e:
