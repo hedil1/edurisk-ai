@@ -223,27 +223,39 @@ for col in df.columns:
 # ================= LOAD MODELS =================
 @st.cache_resource
 def load_all_models():
-    columns = joblib.load(os.path.join(MODEL_DIR, "columns.pkl"))
-    scaler  = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
-    rf      = joblib.load(os.path.join(MODEL_DIR, "rf_model.pkl"))
-    xgb_m   = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
-    ann = load_model(os.path.join(MODEL_DIR, "ann_model.h5"), compile=False)
-    return columns, scaler, rf, xgb_m, ann
+    try:
+        import os
+        os.environ["TF_USE_LEGACY_KERAS"] = "1"
+        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-try:
-    columns, scaler, rf, xgb_m, ann = load_all_models()
-    models_loaded = True
-except Exception as e:
-    st.sidebar.error(f"⚠️ Models not found: {e}")
-    models_loaded = False
+        import tensorflow as tf
+        from tensorflow.keras.models import model_from_json
 
-# ================= PREPARE FEATURES =================
-if models_loaded:
-    X_df = df.reindex(columns=columns, fill_value=0)
-    for c in X_df.columns:
-        X_df[c] = pd.to_numeric(X_df[c], errors="coerce").fillna(0)
-    X_scaled = scaler.transform(X_df)
+        columns = joblib.load(os.path.join(MODEL_DIR, "columns.pkl"))
+        scaler  = joblib.load(os.path.join(MODEL_DIR, "scaler.pkl"))
+        rf      = joblib.load(os.path.join(MODEL_DIR, "rf_model.pkl"))
+        xgb_m   = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
 
+        # Chargement robuste du ANN
+        json_path = os.path.join(MODEL_DIR, "ann_architecture.json")
+        weights_path = os.path.join(MODEL_DIR, "ann_weights.h5")
+
+        if os.path.exists(json_path) and os.path.exists(weights_path):
+            with open(json_path, "r") as f:
+                model_json = f.read()
+            ann = model_from_json(model_json)
+            ann.load_weights(weights_path)
+            ann.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+        else:
+            # Fallback temporaire
+            ann = tf.keras.models.load_model(os.path.join(MODEL_DIR, "ann_model.h5"), compile=False)
+
+        print("✅ Modèles chargés avec succès")
+        return columns, scaler, rf, xgb_m, ann
+
+    except Exception as e:
+        st.error(f"Erreur chargement modèles : {e}")
+        raise e
 # ================= ACTION HISTORY =================
 def load_history():
     if os.path.exists(HISTORY_FILE):
