@@ -1,0 +1,4 @@
+libmariadb-dev
+pkg-config
+gcc
+python3-dev
